@@ -1,5 +1,5 @@
 const express = require('express');
-const { items } = require('../fakeDb');
+let { items } = require('../fakeDb');
 const { BadRequestError, NotFoundError } = require('../expressError');
 
 const router = new express.Router();
@@ -41,12 +41,14 @@ router.post('/',
   authenticateData,
   function (req, res) {
     const name = req.body.name;
-    const price = req.body.price;
+    const price = Number(req.body.price);
 
     const item = { name, price };
     items.push(item);
 
-    return res.json(item);
+    return res
+      .status(201)
+      .json(item);
   });
 
 /** Get item; return single item data  */
@@ -65,17 +67,25 @@ router.patch('/:name',
   checkItemInItems,
   function (req, res) {
     const item = res.locals.item;
-    console.log('beforeitem', item);
+
     item.name = req.body.name;
-    item.price = req.body.price;
-    console.log('item', item);
-    // console.log('local', res.local.item);
-    console.log('name', req.body.name);
-    console.log('price', req.body.price);
+    item.price = Number(req.body.price);
+
     return res.json({ updated: item });
   }
 );
 
+/** Deletes given item from items array */
+router.delete('/:name',
+  checkItemInItems,
+  function (req, res) {
+    const deleteItem = res.locals.item;
+
+    index = items.indexOf(deleteItem);
+    items.splice(index, 1);
+
+    return res.json({message: "deleted"});
+  });
 
 
 
